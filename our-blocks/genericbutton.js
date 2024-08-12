@@ -1,3 +1,4 @@
+import ourColor from "../inc/ourColor";
 import { link } from "@wordpress/icons";
 import {
   ToolbarGroup,
@@ -13,6 +14,7 @@ import {
   RichText,
   BlockControls,
   __experimentalLinkControl as LinkControl,
+  getColorObjectByColorValue,
 } from "@wordpress/block-editor";
 import { registerBlockType } from "@wordpress/blocks";
 import { useState } from "@wordpress/element";
@@ -23,7 +25,7 @@ registerBlockType("ourblocktheme/genericbutton", {
     text: { type: "string" },
     size: { type: "string", default: "large" },
     linkObject: { type: "object", default: { url: "" } },
-    colorName: { type: "string" },
+    colorName: { type: "string", default: "blue" },
   },
   edit: EditComponent,
   save: SaveComponent,
@@ -44,14 +46,13 @@ function EditComponent(props) {
     props.setAttributes({ linkObject: newLink });
   }
 
-  const ourColor = [
-    { name: "blue", color: "#0d3b66" },
-    { name: "orange", color: "#ee964b" },
-    { name: "dark-orange", color: "#f95738" },
-  ];
+  const currentColorValue = ourColor.filter((color) => {
+    return color.name == props.attributes.colorName;
+  })[0].color;
 
   function handleColorChange(colorCode) {
-    props.setAttributes({ colorName: colorCode });
+    const { name } = getColorObjectByColorValue(ourColor, colorCode);
+    props.setAttributes({ colorName: name });
   }
 
   return (
@@ -86,8 +87,10 @@ function EditComponent(props) {
         <PanelBody title="Color" initialOpen={true}>
           <PanelRow>
             <ColorPalette
+              disableCustomColors={true}
+              clearable={false}
               colors={ourColor}
-              value={props.attributes.colorName}
+              value={currentColorValue}
               onChange={handleColorChange}
             ></ColorPalette>
           </PanelRow>
@@ -96,12 +99,15 @@ function EditComponent(props) {
       <RichText
         allowedFormats={[]}
         tagName="a"
-        className={`btn btn--${props.attributes.size} btn--blue`}
+        className={`btn btn--${props.attributes.size} btn--${props.attributes.colorName}`}
         value={props.attributes.text}
         onChange={handleTextChange}
       />
       {isLinkPickerVisible && (
-        <Popover position="middle center">
+        <Popover
+          position="middle center"
+          onFocusOutside={() => setIsLinkPickerVisible(false)}
+        >
           <LinkControl
             settings={[]}
             value={props.attributes.linkObject}
