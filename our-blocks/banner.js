@@ -1,7 +1,14 @@
 import { InnerBlocks } from "@wordpress/block-editor";
+import { registerBlockType } from "@wordpress/blocks";
 
-wp.blocks.registerBlockType("ourblocktheme/banner", {
+registerBlockType("ourblocktheme/banner", {
   title: "Banner",
+  supports: {
+    align: ["full"],
+  },
+  attributes: {
+    align: { type: "string", default: "full" },
+  },
   edit: EditComponent,
   save: SaveComponent,
 });
@@ -34,7 +41,10 @@ function EditComponent() {
       ></div>
       <div className="page-banner__content container t-center c-white">
         <InnerBlocks
-          allowedBlocks={["core/paragraph", "core/heading", "core/list"]}
+          allowedBlocks={[
+            "ourblocktheme/genericheading",
+            "ourblocktheme/genericbutton",
+          ]}
         />
       </div>
     </div>
